@@ -150,7 +150,10 @@ NS_ASSUME_NONNULL_BEGIN
 }
 
 - (void)failAuthorizationFlowWithError:(NSError *)error {
-  [self didFinishWithResponse:nil error:error];
+  [_UICoordinator dismissAuthorizationAnimated:YES
+                                    completion:^{
+                                      [self didFinishWithResponse:nil error:error];
+                                    }];
 }
 
 /*! @fn didFinishWithResponse:error:
