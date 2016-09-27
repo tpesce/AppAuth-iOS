@@ -88,22 +88,47 @@ typedef NSDictionary<NSString *, NSString *> *_Nullable OIDTokenEndpointParamete
         Connect compliant issuer URL.
     @param issuerURL The service provider's OpenID Connect issuer.
     @param completion A block which will be invoked when the authorization service configuration has
-        been created, or when an error has occurred.
+        been created, or when an error has occurred. This block will be invoked on the main thread.
     @see https://openid.net/specs/openid-connect-discovery-1_0.html
  */
 + (void)discoverServiceConfigurationForIssuer:(NSURL *)issuerURL
                                    completion:(OIDDiscoveryCallback)completion;
 
+/*! @fn discoverServiceConfigurationForIssuer:completion:
+    @brief Convenience method for creating an authorization service configuration from an OpenID
+        Connect compliant issuer URL.
+    @param issuerURL The service provider's OpenID Connect issuer.
+    @param queue The dispatch queue upon which the completion block will be invoked.
+    @param completion A block which will be invoked when the authorization service configuration has
+        been created, or when an error has occurred.
+    @see https://openid.net/specs/openid-connect-discovery-1_0.html
+ */
++ (void)discoverServiceConfigurationForIssuer:(NSURL *)issuerURL
+                                        queue:(dispatch_queue_t)queue
+                                   completion:(OIDDiscoveryCallback)completion;
 
 /*! @fn discoverServiceConfigurationForDiscoveryURL:completion:
     @brief Convenience method for creating an authorization service configuration from an OpenID
         Connect compliant identity provider's discovery document.
     @param discoveryURL The URL of the service provider's OpenID Connect discovery document.
     @param completion A block which will be invoked when the authorization service configuration has
+        been created, or when an error has occurred.  This block will be invoked on the main thread.
+    @see https://openid.net/specs/openid-connect-discovery-1_0.html
+ */
++ (void)discoverServiceConfigurationForDiscoveryURL:(NSURL *)discoveryURL
+                                         completion:(OIDDiscoveryCallback)completion;
+
+/*! @fn discoverServiceConfigurationForDiscoveryURL:completion:
+    @brief Convenience method for creating an authorization service configuration from an OpenID
+        Connect compliant identity provider's discovery document.
+    @param discoveryURL The URL of the service provider's OpenID Connect discovery document.
+    @param queue The dispatch queue upon which the completion block will be invoked.
+    @param completion A block which will be invoked when the authorization service configuration has
         been created, or when an error has occurred.
     @see https://openid.net/specs/openid-connect-discovery-1_0.html
  */
 + (void)discoverServiceConfigurationForDiscoveryURL:(NSURL *)discoveryURL
+                                              queue:(dispatch_queue_t)queue
                                          completion:(OIDDiscoveryCallback)completion;
 
 /*! @fn presentAuthorizationRequest:UICoordinator:callback:
@@ -124,9 +149,20 @@ typedef NSDictionary<NSString *, NSString *> *_Nullable OIDTokenEndpointParamete
 /*! @fn performTokenRequest:callback:
     @brief Performs a token request.
     @param request The token request.
-    @param callback The method called when the request has completed or failed.
+    @param callback The method called when the request has completed or failed. This method will be
+        called on the main thread
  */
 + (void)performTokenRequest:(OIDTokenRequest *)request callback:(OIDTokenCallback)callback;
+
+/*! @fn performTokenRequest:callback:
+    @brief Performs a token request.
+    @param request The token request.
+    @param queue The dispatch queue upon which the callback method will be called.
+    @param callback The method called when the request has completed or failed.
+ */
++ (void)performTokenRequest:(OIDTokenRequest *)request
+                      queue:(dispatch_queue_t)queue
+                   callback:(OIDTokenCallback)callback;
 
 @end
 

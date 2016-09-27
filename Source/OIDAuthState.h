@@ -206,6 +206,14 @@ typedef void (^OIDAuthStateAuthorizationCallback)(OIDAuthState *_Nullable authSt
  */
 - (void)withFreshTokensPerformAction:(OIDAuthStateAction)action;
 
+/*! @fn withFreshTokensPerformAction:
+    @brief Calls the block with a valid access token (refreshing it first, if needed), or if a
+        refresh was needed and failed, with the error that caused it to fail.
+    @param queue The dispatch queue upon which the action block will be executed.
+    @param action The block to execute with a fresh token.
+ */
+- (void)withFreshTokensOnQueue:(dispatch_queue_t)queue performAction:(OIDAuthStateAction)action;
+
 /*! @fn setNeedsTokenRefresh
     @brief Forces a token refresh the next time @c OIDAuthState.withFreshTokensPerformAction: is
         called, even if the current tokens are considered valid.

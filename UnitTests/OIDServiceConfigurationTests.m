@@ -171,7 +171,7 @@ static NSString *const kIssuerTestExpectedFullDiscoveryURL =
       [self expectationWithDescription:@"Discovery URL should be correct."];
 
   id successfulResponse =
-      ^(id _self, NSURL *discoveryURL, OIDDiscoveryCallback completion) {
+      ^(id _self, NSURL *discoveryURL, dispatch_queue_t queue, OIDDiscoveryCallback completion) {
         NSURL *fullDiscoveryURL = [NSURL URLWithString:kIssuerTestExpectedFullDiscoveryURL];
         if ([discoveryURL isEqual:fullDiscoveryURL]) {
           [expectation fulfill];
@@ -185,8 +185,8 @@ static NSString *const kIssuerTestExpectedFullDiscoveryURL =
       };
 
   [self replaceClassMethodForClass:[OIDAuthorizationService class]
-       selector:@selector(discoverServiceConfigurationForDiscoveryURL:completion:)
-      withBlock:successfulResponse];
+                          selector:@selector(discoverServiceConfigurationForDiscoveryURL:queue:completion:)
+                         withBlock:successfulResponse];
 
   NSURL *issuerURL = [NSURL URLWithString:issuer];
   [OIDAuthorizationService discoverServiceConfigurationForIssuer:issuerURL
