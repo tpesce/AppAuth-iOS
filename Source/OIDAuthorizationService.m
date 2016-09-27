@@ -174,16 +174,32 @@ NS_ASSUME_NONNULL_BEGIN
 
 + (void)discoverServiceConfigurationForIssuer:(NSURL *)issuerURL
                                    completion:(OIDDiscoveryCallback)completion {
+  [[self class] discoverServiceConfigurationForIssuer:issuerURL
+                                                queue:dispatch_get_main_queue()
+                                           completion:completion];
+}
+
++ (void)discoverServiceConfigurationForIssuer:(NSURL *)issuerURL
+                                        queue:(dispatch_queue_t)queue
+                                   completion:(OIDDiscoveryCallback)completion {
   NSURL *fullDiscoveryURL =
       [issuerURL URLByAppendingPathComponent:kOpenIDConfigurationWellKnownPath];
 
-  return [[self class] discoverServiceConfigurationForDiscoveryURL:fullDiscoveryURL
-                                                        completion:completion];
+  [[self class] discoverServiceConfigurationForDiscoveryURL:fullDiscoveryURL
+                                                      queue:queue
+                                                 completion:completion];
 }
 
++ (void)discoverServiceConfigurationForDiscoveryURL:(NSURL *)discoveryURL
+                                         completion:(OIDDiscoveryCallback)completion {
+  [[self class] discoverServiceConfigurationForDiscoveryURL:discoveryURL
+                                                      queue:dispatch_get_main_queue()
+                                                 completion:completion];
+}
 
 + (void)discoverServiceConfigurationForDiscoveryURL:(NSURL *)discoveryURL
-    completion:(OIDDiscoveryCallback)completion {
+                                              queue:(dispatch_queue_t)queue
+                                         completion:(OIDDiscoveryCallback)completion {
 
   NSURLSession *session = [NSURLSession sharedSession];
   NSURLSessionDataTask *task =
@@ -194,7 +210,7 @@ NS_ASSUME_NONNULL_BEGIN
       error = [OIDErrorUtilities errorWithCode:OIDErrorCodeNetworkError
                                underlyingError:error
                                    description:nil];
-      dispatch_async(dispatch_get_main_queue(), ^{
+      dispatch_async(queue, ^{
         completion(nil, error);
       });
       return;
@@ -210,7 +226,7 @@ NS_ASSUME_NONNULL_BEGIN
       error = [OIDErrorUtilities errorWithCode:OIDErrorCodeNetworkError
                                underlyingError:URLResponseError
                                    description:nil];
-      dispatch_async(dispatch_get_main_queue(), ^{
+      dispatch_async(queue, ^{
         completion(nil, error);
       });
       return;
@@ -223,7 +239,7 @@ NS_ASSUME_NONNULL_BEGIN
       error = [OIDErrorUtilities errorWithCode:OIDErrorCodeNetworkError
                                underlyingError:error
                                    description:nil];
-      dispatch_async(dispatch_get_main_queue(), ^{
+      dispatch_async(queue, ^{
         completion(nil, error);
       });
       return;
@@ -232,7 +248,7 @@ NS_ASSUME_NONNULL_BEGIN
     // Create our service configuration with the discovery document and return it.
     OIDServiceConfiguration *configuration =
         [[OIDServiceConfiguration alloc] initWithDiscoveryDocument:discovery];
-    dispatch_async(dispatch_get_main_queue(), ^{
+    dispatch_async(queue, ^{
       completion(configuration, nil);
     });
   }];
@@ -254,6 +270,14 @@ NS_ASSUME_NONNULL_BEGIN
 #pragma mark - Token Endpoint
 
 + (void)performTokenRequest:(OIDTokenRequest *)request callback:(OIDTokenCallback)callback {
+  [[self class] performTokenRequest:request
+                              queue:dispatch_get_main_queue()
+                           callback:callback];
+}
+
++ (void)performTokenRequest:(OIDTokenRequest *)request
+                      queue:(dispatch_queue_t)queue
+                   callback:(OIDTokenCallback)callback {
   NSURLRequest *URLRequest = [request URLRequest];
   NSURLSession *session = [NSURLSession sharedSession];
   [[session dataTaskWithRequest:URLRequest
@@ -266,7 +290,7 @@ NS_ASSUME_NONNULL_BEGIN
           [OIDErrorUtilities errorWithCode:OIDErrorCodeNetworkError
                            underlyingError:error
                                description:nil];
-      dispatch_async(dispatch_get_main_queue(), ^{
+      dispatch_async(queue, ^{
         callback(nil, returnedError);
       });
       return;
@@ -292,7 +316,7 @@ NS_ASSUME_NONNULL_BEGIN
             [OIDErrorUtilities OAuthErrorWithDomain:OIDOAuthTokenErrorDomain
                                       OAuthResponse:json
                                     underlyingError:serverError];
-          dispatch_async(dispatch_get_main_queue(), ^{
+          dispatch_async(queue, ^{
             callback(nil, oauthError);
           });
           return;
@@ -304,7 +328,7 @@ NS_ASSUME_NONNULL_BEGIN
           [OIDErrorUtilities errorWithCode:OIDErrorCodeServerError
                            underlyingError:serverError
                                description:nil];
-      dispatch_async(dispatch_get_main_queue(), ^{
+      dispatch_async(queue, ^{
         callback(nil, returnedError);
       });
       return;
@@ -319,7 +343,7 @@ NS_ASSUME_NONNULL_BEGIN
           [OIDErrorUtilities errorWithCode:OIDErrorCodeJSONDeserializationError
                            underlyingError:jsonDeserializationError
                                description:nil];
-      dispatch_async(dispatch_get_main_queue(), ^{
+      dispatch_async(queue, ^{
         callback(nil, returnedError);
       });
       return;
@@ -333,14 +357,14 @@ NS_ASSUME_NONNULL_BEGIN
           [OIDErrorUtilities errorWithCode:OIDErrorCodeTokenResponseConstructionError
                            underlyingError:jsonDeserializationError
                                description:nil];
-      dispatch_async(dispatch_get_main_queue(), ^{
+      dispatch_async(queue, ^{
         callback(nil, returnedError);
       });
       return;
     }
 
     // Success
-    dispatch_async(dispatch_get_main_queue(), ^{
+    dispatch_async(queue, ^{
       callback(tokenResponse, nil);
     });
   }] resume];

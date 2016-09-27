@@ -408,6 +408,10 @@ static const NSUInteger kExpiryTimeTolerance = 60;
 }
 
 - (void)withFreshTokensPerformAction:(OIDAuthStateAction)action {
+  [self withFreshTokensOnQueue:dispatch_get_main_queue() performAction:action];
+}
+
+- (void)withFreshTokensOnQueue:(dispatch_queue_t)queue performAction:(OIDAuthStateAction)action {
   if (!_refreshToken) {
     [OIDErrorUtilities raiseException:kRefreshTokenRequestException];
   }
@@ -415,7 +419,7 @@ static const NSUInteger kExpiryTimeTolerance = 60;
   if ([self.accessTokenExpirationDate timeIntervalSinceNow] > kExpiryTimeTolerance
       && !_needsTokenRefresh) {
     // access token is valid within tolerance levels, perform action
-    dispatch_async(dispatch_get_main_queue(), ^() {
+    dispatch_async(queue, ^() {
       action(self.accessToken, self.idToken, nil);
     });
   } else {
@@ -438,7 +442,7 @@ static const NSUInteger kExpiryTimeTolerance = 60;
     [OIDAuthorizationService performTokenRequest:tokenRefreshRequest
                                         callback:^(OIDTokenResponse *_Nullable response,
                                                    NSError *_Nullable error) {
-      dispatch_async(dispatch_get_main_queue(), ^() {
+      dispatch_async(queue, ^() {
         // update OIDAuthState based on response
         if (response) {
           [self updateWithTokenResponse:response error:nil];
